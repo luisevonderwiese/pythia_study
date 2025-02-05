@@ -5,5 +5,5 @@ channels:
 dependencies:
   - pypythia
   - tabulate
-  - sklearn
+  - scikit-learn
   - lightgbm
