@@ -1,0 +1,9 @@
+name: pythia-study
+channels:
+  - conda-forge
+  - anaconda
+dependencies:
+  - pypythia
+  - tabulate
+  - sklearn
+  - lightgbm

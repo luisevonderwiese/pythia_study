@@ -1,6 +1,5 @@
 import os
 from tabulate import tabulate
-from Bio import AlignIO
 import pandas as pd
 
 def get_difficulty(msa_name):
@@ -18,7 +17,6 @@ def run_pythia(msa_name, redo):
     if not os.path.isfile(msa_path):
         print("MSA " + msa_name + " does not exist")
         return
-    AlignIO.read(msa_path, "phylip-relaxed")
     predictor_path = os.path.join("predictors/latest.pckl")
     prefix = os.path.join("data/pythia", msa_name + ".pythia")
     if os.path.isfile(prefix) and not redo:

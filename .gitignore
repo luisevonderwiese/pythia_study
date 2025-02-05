@@ -1,5 +1,5 @@
 bin/
 data/
-predictors/
 __pycache__/
 .ipynb_checkpoints/
+all_data.parquet

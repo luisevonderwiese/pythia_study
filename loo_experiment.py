@@ -3,9 +3,6 @@ import math
 import pandas as pd
 import lightgbm as lgb
 
-# NOTE: adjust the path to point to your language features and remove the .sample part (keep the reset_index to make sure the LOO works as expected)
-# tdf = pd.read_parquet("training_data_pythia_v1.1.0.parquet").sample(45, random_state=0).reset_index(drop=True)
-
 
 def train_loo(tdf, features, label):
     """
