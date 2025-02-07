@@ -1,8 +1,7 @@
-from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 import math
 import pandas as pd
 import lightgbm as lgb
-
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
 
 def train_loo(tdf, features, label):
     """

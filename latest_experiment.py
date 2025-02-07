@@ -6,7 +6,7 @@ def get_difficulty(msa_name):
     prefix = os.path.join("data/pythia", msa_name + ".pythia")
     if not os.path.isfile(prefix):
         return float("nan")
-    with open(prefix, "r") as outfile:
+    with open(prefix, "r", encoding="utf-8") as outfile:
         lines = outfile.readlines()
         if len(lines) == 0:
             return float("nan")
@@ -39,15 +39,15 @@ for i, row in df.iterrows():
 res = []
 for msa_name in msa_names:
     row = [msa_name, ground_truths[msa_name]]
-    #run_pythia(msa_name, redo = True)
+    run_pythia(msa_name, redo=True)
     d = get_difficulty(msa_name)
     row.append(d)
-    absolute_error = abs(ground_truths[msa_name]-d)
+    absolute_error = abs(ground_truths[msa_name] - d)
     row.append(absolute_error)
     absolute_errors.append(absolute_error)
     res.append(row)
 headers = ["MSA", "ground truth", "prediction", "error"]
-#print(tabulate(res, tablefmt="pipe", floatfmt=".2f", headers = headers))
+print(tabulate(res, tablefmt="pipe", floatfmt=".2f", headers=headers))
 
 mae = sum(absolute_errors) / len(absolute_errors)
 print(f"""
