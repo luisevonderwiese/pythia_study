@@ -1,7 +1,9 @@
+import os
 import math
 import pandas as pd
 import lightgbm as lgb
 from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error
+import label_wrapper
 
 def train_loo(tdf, features, label):
     """
@@ -45,10 +47,6 @@ def train_loo(tdf, features, label):
     return predictions, prediction_mae, prediction_mape, training_mae, training_mape
 
 
-tdf = pd.read_parquet("all_data.parquet").reset_index(drop=True)
-tdf = tdf.rename(columns={"num_topos_parsimony/num_trees_parsimony": "proportion_unique_topos_parsimony"})
-tdf["num_patterns/num_sites"] = tdf["num_patterns"] / tdf["num_sites"]
-tdf["pattern_entropy"] = tdf["bollback"] + tdf["num_sites"] * tdf["num_sites"].apply(lambda x: math.log(x))
 
 # ordered by Pythia importance from most to least important
 FEATURES = [
@@ -66,6 +64,29 @@ FEATURES = [
 
 LABEL = "difficult"
 
+label_dir = os.path.join("data", "difficulty_labels")
+
+metadata_df = pd.read_csv("data/lexibench/character_matrices/stats.tsv", sep = "\t")
+datasets = [row["Name"] for _,row in metadata_df.iterrows()]
+
+ground_truths = {dataset: float("nan") for dataset in datasets}
+tdf =  pd.DataFrame(columns = [LABEL] + FEATURES)
+for i, dataset in enumerate(datasets):
+    prefix = os.path.join(label_dir, dataset, "label")
+    tdf.at[i, "difficult"]  = label_wrapper.get_label(prefix)
+    fdf = label_wrapper.get_features(prefix)
+    tdf.at[i, "avg_rfdist_parsimony"] = fdf["avg_rfdist_parsimony"]
+    tdf.at[i, "num_patterns/num_taxa"] = fdf["num_patterns/num_taxa"]
+    tdf.at[i, "bollback"] = fdf["bollback"]
+    tdf.at[i, "proportion_gaps"] = fdf["proportion_gaps"]
+    tdf.at[i, "proportion_invariant"] = fdf["proportion_invariant"]
+    tdf.at[i, "entropy"] = fdf["entropy"]
+    tdf.at[i, "num_patterns/num_sites"] = fdf["num_patterns/num_sites"]
+    tdf.at[i, "pattern_entropy"] = fdf["pattern_entropy"]
+    tdf.at[i, "num_sites/num_taxa"] = fdf["num_sites/num_taxa"]
+    tdf.at[i, "proportion_unique_topos_parsimony"] = fdf["proportion_unique_topos_parsimony"]
+
+tdf = tdf.astype(float)
 predictions, prediction_mae, prediction_mape, training_mae, training_mape = train_loo(tdf, FEATURES, LABEL)
 mae = mean_absolute_error(tdf[LABEL], predictions)
 mape = mean_absolute_percentage_error(tdf[LABEL], predictions)

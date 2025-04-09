@@ -1,5 +1,9 @@
 bin/
-data/
+data/lexibench/download
+data/lexibench/lingpy_wordlists
+data/lexibench/character_matrices/
+data/lexibench/character_matrices_compatible/
+data/difficulty_labels
+data/pythia
 __pycache__/
 .ipynb_checkpoints/
-all_data.parquet

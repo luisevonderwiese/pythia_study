@@ -1,48 +1,63 @@
 import os
 from tabulate import tabulate
 import pandas as pd
+import label_wrapper 
+import util
 
-def get_difficulty(msa_name):
-    prefix = os.path.join("data/pythia", msa_name + ".pythia")
-    if not os.path.isfile(prefix):
-        return float("nan")
-    with open(prefix, "r", encoding="utf-8") as outfile:
+
+
+def get_difficulty(prefix):
+    if not os.path.isfile(prefix + ".pythia.log"):
+        raise ValueError("Error during difficulty prediction")
+    with open(prefix + ".pythia.log", "r", encoding="utf-8") as outfile:
         lines = outfile.readlines()
-        if len(lines) == 0:
-            return float("nan")
-        return float(lines[0])
+    for line in lines:
+        if line.startswith("The predicted difficulty"):
+            return float(line.split(" ")[-1])
+    raise ValueError("Error during difficulty prediction")
 
-def run_pythia(msa_name, redo):
-    msa_path = os.path.join("data/msa", msa_name + ".phy")
+def run_pythia(msa_path, prefix):
+    command = "pythia -m " + msa_path + " -p " + prefix + " -r bin/raxml-ng"
+    os.system(command)
+
+def run_pythia_safe(dataset):
+    msa_path = os.path.join("data/lexibench/character_matrices/", dataset, "bin.phy")
     if not os.path.isfile(msa_path):
-        print("MSA " + msa_name + " does not exist")
+        print("MSA " + dataset + " does not exist")
         return
-    predictor_path = os.path.join("predictors/latest.pckl")
-    prefix = os.path.join("data/pythia", msa_name + ".pythia")
-    if os.path.isfile(prefix) and not redo:
-        print("Files with prefix " + prefix + " already exist")
-        return
+    prefix = os.path.join("data/pythia", dataset)
     prefix_dir = os.path.dirname(prefix)
     if not os.path.isdir(prefix_dir):
         os.makedirs(prefix_dir)
-    command = "pythia -m " + msa_path + " -o " + prefix + " -r bin/raxml-ng -p " + predictor_path + " --removeDuplicates -v"
-    print(command)
-    os.system(command)
+    run_pythia(msa_path, prefix)
+    try:
+        get_difficulty(prefix)
+    except ValueError:
+        util.write_padded_msa(msa_path, "temp.phy")
+        run_pythia("temp.phy", prefix)
+        os.remove("temp.phy")
+    
 
+metadata_df = pd.read_csv("data/lexibench/character_matrices/stats.tsv", sep = "\t")
+datasets = [row["Name"] for _,row in metadata_df.iterrows()]
 
-msa_names = [name.split(".")[0] for name in os.listdir("data/msa")]
-ground_truths = {msa_name: 0 for msa_name in msa_names}
-df = pd.read_parquet('all_data.parquet')
+label_dir = os.path.join("data", "difficulty_labels")
+ground_truths = {dataset: float("nan") for dataset in datasets}
 absolute_errors = []
-for i, row in df.iterrows():
-    ground_truths[row["verbose_name"].split(".")[0]] = row["difficult"]
+for dataset in datasets:
+    ground_truths[dataset] = label_wrapper.get_label(os.path.join(label_dir, dataset, "label"))
+
 res = []
-for msa_name in msa_names:
-    row = [msa_name, ground_truths[msa_name]]
-    run_pythia(msa_name, redo=True)
-    d = get_difficulty(msa_name)
+if not os.path.isdir("data/pythia"):
+    os.makedirs("data/pythia")
+
+for dataset in datasets:
+    row = [dataset, ground_truths[dataset]]
+    #run_pythia_safe(dataset)
+    prefix = os.path.join("data/pythia", dataset)
+    d = get_difficulty(prefix)
     row.append(d)
-    absolute_error = abs(ground_truths[msa_name] - d)
+    absolute_error = abs(ground_truths[dataset] - d)
     row.append(absolute_error)
     absolute_errors.append(absolute_error)
     res.append(row)

@@ -7,3 +7,9 @@ dependencies:
   - tabulate
   - scikit-learn
   - lightgbm
+  - pip
+  - pip:
+    - pandas
+    - bipython
+#  -pylexibench
+#  -pythialabelgenerator
