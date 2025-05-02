@@ -11,5 +11,5 @@ dependencies:
   - pip:
     - pandas
     - bipython
-#  -pylexibench
-#  -pythialabelgenerator
+    - pylexibench
+    - pythialabelgenerator
