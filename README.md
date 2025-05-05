@@ -8,6 +8,10 @@ conda env create -f environment.yml
 conda activate pythia-study
 ```
 
+## Downloading binaries
+The calculation of the difficulty labels requires binaries of RAxML-NG and IQ-TREE2.
+Download the binaries [`raxml-ng`](https://github.com/amkozlov/raxml-ng) and [`iqtree2`](https://github.com/iqtree/iqtree2) and place them in `bin/`
+
 ## Preparing the data
 Clone the [glottolog repo](https://github.com/glottolog/glottolog) to a directory of your choice, then run:
 ```

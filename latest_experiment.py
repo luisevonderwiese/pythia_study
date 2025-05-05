@@ -53,7 +53,7 @@ if not os.path.isdir("data/pythia"):
 
 for dataset in datasets:
     row = [dataset, ground_truths[dataset]]
-    #run_pythia_safe(dataset)
+    run_pythia_safe(dataset)
     prefix = os.path.join("data/pythia", dataset)
     d = get_difficulty(prefix)
     row.append(d)

@@ -8,6 +8,7 @@ def get_features(prefix):
 def label_command(msa_path, prefix):
     command = "label"
     command += " -m " + msa_path
+    command += " -r  bin/raxml-ng"
     command += " -i  bin/iqtree2"
     command += " -p " + prefix
     os.system(command)
